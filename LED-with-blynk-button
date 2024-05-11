@@ -1,0 +1,54 @@
+#define BLYNK_TEMPLATE_ID "YourTemplateID"
+#define BLYNK_TEMPLATE_NAME "YourTemplateName"
+#define BLYNK_AUTH_TOKEN "YourAuthToken"
+#define BLYNK_PRINT Serial
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+char ssid[] = "YourWiFiSSID";
+char pass[] = "YourWiFiPassword";
+
+#define LED_PIN D1 // Define the GPIO pin connected to the LED
+
+BlynkTimer timer;
+
+void setup()
+{
+  Serial.begin(115200);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  pinMode(LED_PIN, OUTPUT);
+
+  // Setup a function to be called every second
+  timer.setInterval(1000L, toggleLED);
+}
+
+void loop()
+{
+  Blynk.run();
+  timer.run(); // Initiates BlynkTimer
+}
+
+// Function to toggle the LED
+void toggleLED()
+{
+  static bool ledState = LOW; // Static variable to keep track of LED state
+
+  // Toggle the LED state
+  ledState = !ledState;
+
+  // Write the new state to the LED pin
+  digitalWrite(LED_PIN, ledState);
+
+  // Send the new state to the Blynk app
+  Blynk.virtualWrite(V1, ledState);
+}
+
+// Blynk app function to control the LED remotely
+BLYNK_WRITE(V1)
+{
+  int ledState = param.asInt(); // Get the value sent from the app
+
+  // Write the received value to the LED pin
+  digitalWrite(LED_PIN, ledState);
+}
